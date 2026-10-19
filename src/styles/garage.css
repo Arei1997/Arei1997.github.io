@@ -29,6 +29,7 @@
 [data-theme='garage'] .section-title,
 [data-theme='garage'] .contact-title,
 [data-theme='garage'] .interest-name,
+[data-theme='garage'] .edu b,
 [data-theme='garage'] .art-num {
   font-style: italic;
   text-transform: uppercase;
@@ -68,8 +69,7 @@
   clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
 }
 
-[data-theme='garage'] .job,
-[data-theme='garage'] .edu li {
+[data-theme='garage'] .job {
   border-left: 3px solid var(--accent);
 }
 

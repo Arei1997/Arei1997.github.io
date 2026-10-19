@@ -46,7 +46,7 @@ export const profile = {
   /** Final public URL, no trailing slash — used for SEO tags. */
   siteUrl: 'https://arei1997.github.io',
   tagline:
-    'I build government digital services at national scale for HMRC, and AI systems on the Claude API in my own time. Aerospace engineer by training — and off the clock, usually under a bonnet, behind a controller or at the piano.',
+    "Software engineer working on various critical HMRC systems. I studied aerospace engineering with a master's in computer science at UCL, I build AI projects in my spare time, and outside work it's mostly cars, games and music!",
   email: 'Arei1997@hotmail.co.uk',
   /** Put a PDF in /public (e.g. public/cv.pdf) and set this to '/cv.pdf'. Leave empty to hide the button. */
   cv: '',
@@ -55,8 +55,8 @@ export const profile = {
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/arei1/' },
   ] satisfies Link[],
   about: [
-    "I'm a software engineer working on HMRC's New Computerised Transit System — critical national infrastructure APIs written in Scala and the Play Framework — and on the automation estate that processes tax cases at national scale. I work test-first, support production systems directly, and enjoy explaining technical work to people who aren't engineers.",
-    "My route in was engineering: a BEng in Aerospace Engineering, then an MSc in Computer Science at UCL, where I trained a reinforcement-learning agent to cut drag on a cylinder inside a Navier–Stokes CFD solver. These days I build AI applications with the Anthropic Claude API, Redis and PostgreSQL, and I design and teach a TDD curriculum for junior developers.",
+    "Working on HMRC critical national infrastructure such as NCTS and Platform Automation. I write Java and Scala APIs with the Play Framework, and I also look after the automation robots that process a lot of HMRC's data cases. I like writing tests first, and I don't mind explaining technical things to people who don't code.",
+    "I did a BEng in Aerospace Engineering before moving into software with an MSc in Computer Science at UCL. I've also trained a reinforcement learning agent to reduce drag in a CFD simulation, which is about as close as those two degrees get. In my spare time I study AI theory, build AI apps, and teach Java to junior developers.",
   ],
   facts: [
     { label: 'Based in', value: 'Manchester, UK' },
@@ -66,71 +66,68 @@ export const profile = {
   ],
   interests: {
     garage:
-      'Mechanics and aerodynamics. An aerospace degree left me permanently curious about how wings, floors and diffusers turn airflow into downforce — hence the wind tunnel.',
+      "Cars and how they work. After an aerospace degree I can't look at a plane or a car without thinking about the floor and the wings, which is why there's a wind tunnel on this site.",
     arcade:
-      'Gaming, and the design behind it: tight controls, clever systems and the engineering that keeps a world running at 60 fps.',
-    studio:
-      "Piano and guitar. I'm learning the slow way — and building my own AI piano teacher to help.",
+      "Games, and how they're made. I notice the controls and the design about as much as the game itself.",
+    studio: "Piano and guitar. I learnt a lot about 'learning', so I built an app to help anyone learn the piano.",
   } satisfies Record<ThemeId, string>,
-  contactBlurb:
-    "Whether it's a role, a project or a chat about cars, games or music — my inbox is open.",
+  contactBlurb: "Feel free to contact me!",
 };
 
 export const experience: Experience[] = [
   {
     role: 'Automation Engineer / RPA Developer',
     company: 'HMRC',
-    period: 'Feb 2026 — Present',
+    period: 'Feb 2026 – Present',
     location: 'London, UK',
     summary:
-      'Building and running the automation robots behind high-volume tax administration — Self Assessment, Fraud and Pensions — in NiCE Automation Studio.',
+      'I build and maintain the automation robots that handle high-volume work in Self Assessment, Fraud and Pensions. Using SQL and real time automation to improve the HMRC data collections',
     highlights: [
-      'Cut the technical failure rate of HMRC’s most important automation machine from 16% to 9%.',
-      'Monitor, triage and fix 75+ production robots processing taxpayer data at national scale.',
-      'Administer and tune the SQL databases underpinning the automation estate.',
-      'Report robot performance, throughput and failure trends to senior stakeholders with IBM Cognos.',
+      "Cut the failure rate of HMRC's most important automation machine from 16% to 4%.",
+      'Look after more than 75 production robots: spotting failures, fixing them and keeping them running.',
+      'Manage and write the SQL databases and scripts behind the automation platform.',
+      'Build reports in IBM Cognos so senior stakeholders can see how the robots are performing.',
     ],
     tech: ['NiCE Automation Studio', 'SQL', 'IBM Cognos', 'RPA'],
   },
   {
     role: 'Software Engineer',
     company: 'Mercator Digital',
-    period: 'Jul 2024 — Present',
+    period: 'Jul 2024 – Present',
     location: 'London, UK',
     summary:
-      'Developing critical national infrastructure APIs for HMRC’s New Computerised Transit System (NCTS): Common Transit Convention services, transit movement validation, conversion and routing.',
+      "I'm in the HMRC NCTS team, building the Scala APIs that validate, convert and route goods moving under the Common Transit Convention.",
     highlights: [
-      'Led and contributed to the Scala 3 migration of multiple HMRC microservices while keeping them backward compatible.',
-      'Owned the deprecation of API v2.0 across transit-movements-auditing, removing 6,000+ lines of legacy code.',
-      'Built a Python documentation pipeline for the NCTS Phase 6 specification — including a dangling-else resolution algorithm with lookahead — that now powers the live HMRC developer portal.',
-      'Delivered accessibility fixes, Welsh localisation and new user journeys on the Pension Scheme Return and CDS Reimbursement Claim front ends.',
-      'Mentor new engineers, and designed and teach a Java curriculum covering TDD, Spring Boot and HMRC service standards.',
+      'Led parts of the Scala 3 migration across several HMRC microservices without breaking existing clients.',
+      'Migratating versions for the whole API infrastrcutre resulting in refactoring of a whole code base led by me',
+      "Wrote a Python tool that turns the specifications into pages on HMRC's live developer portal. Parsing thousands of condiional statements for external developrs to read.",
+      'Worked on the Pension Scheme Return and CDS Reimbursement Claim front ends: accessibility fixes, Welsh translations and new user journeys.',
     ],
     tech: ['Scala', 'Play Framework', 'Python', 'Java', 'Microservices', 'TDD'],
   },
   {
-    role: 'Software Engineer — Internship',
+    role: 'Software Engineering Intern',
     company: 'IBM',
-    period: 'Jul 2023 — Sep 2023',
+    period: 'Jul 2023 – Sep 2023',
     location: 'London, UK',
     summary:
-      'Industry exchange programme: voice control for people with dysarthric speech patterns.',
+      'On an industry exchange programme, I built a grocery app that people with dysarthric speech could use with their voice.',
     highlights: [
-      'Implemented IBM Watson speech recognition in a React grocery app, so it could be used entirely by voice.',
-      'Trained and deployed Watson actions on IBM Cloud.',
-      'Built the React app and its product-availability API from scratch, presenting progress to senior stakeholders.',
+      'Added IBM Watson speech recognition to a React app so it could be used entirely by voice.',
+      'Trained and deployed the Watson actions on IBM Cloud.',
+      'Built the app and its product API from scratch, and presented progress to senior stakeholders.',
     ],
-    tech: ['React', 'IBM Watson', 'IBM Cloud', 'Node.js'],
+    tech: ['React', 'IBM Watson', 'IBM Cloud', 'Node.js', 'Machine Learning'],
   },
   {
-    role: 'Software Engineer — Internship',
+    role: 'Software Engineering Intern',
     company: 'City, University of London',
-    period: 'Jun 2021 — Sep 2021',
+    period: 'Jun 2021 – Sep 2021',
     location: 'London, UK',
-    summary: 'Research tooling for turbojet and energy research, alongside engineering professors and PhD students.',
+    summary: 'I built analysis tools for turbojet and energy research, working with professors and PhD students.',
     highlights: [
-      'Built a Python thermodynamic Brayton-cycle analysis tool that improved cycle-efficiency modelling.',
-      'Created a geographic visualisation tool for energy consumption data, saving an estimated 40 hours of research time.',
+      'Wrote a Python tool for analysing the Brayton cycle, which made the cycle efficiency modelling more accurate.',
+      'Built a tool that maps energy use across densely populated countries from Excel and JSON data, saving around 40 hours of research time.',
     ],
     tech: ['Python', 'Thermodynamics', 'Data visualisation'],
   },
@@ -140,13 +137,13 @@ export const education: Education[] = [
   {
     school: 'UCL, University College London',
     degree: 'MSc Computer Science',
-    period: '2022 — 2023',
+    period: '2022 – 2023',
     modules: 'Databases · Functional Programming · Algorithms · Computer Architecture · Software Engineering',
   },
   {
     school: 'City, University of London',
     degree: 'BEng Aerospace Engineering',
-    period: '2019 — 2022',
+    period: '2019 – 2022',
     modules: 'Aerodynamics · Structural Mechanics · Control Systems · Machine Learning · Mathematics',
   },
 ];
@@ -155,35 +152,35 @@ export const projects: Project[] = [
   {
     title: 'Trading Thesis AI',
     description:
-      'Monitors financial news continuously and evaluates each event against user-defined trading theses, returning structured impact assessments via the Claude API with guaranteed-parseable tool-use output. Multi-source ingestion with Redis deduplication, a BullMQ job queue with backoff retries, threshold email alerts and multi-tenant Clerk auth.',
+      "You write down a trading thesis and the app watches the news for anything that affects it. Each relevant story goes to Claude, which sends back a structured verdict: direction, confidence, suggested action and risks. News comes in from Polygon, Finnhub and RSS, Redis filters out duplicates, a BullMQ queue runs the evaluations, and you get an email when confidence passes your threshold.",
     tech: ['TypeScript', 'Next.js', 'Node.js', 'PostgreSQL', 'Redis', 'Claude API'],
     repo: 'https://github.com/Arei1997/trading-thesis-ai',
   },
   {
     title: 'Deep RL for Active Flow Control',
     description:
-      'A PPO agent coupled to a Navier–Stokes CFD solver, actuating hinged flaps on a 2D cylinder to minimise drag. Extended the solver to two flaps, built the RL environment and actor-critic networks, and trained over 10,000 episodes — converging to within 0.003 of the best fixed-angle drag coefficient in laminar flow.',
+      "A PPO agent that moves two hinged flaps on a cylinder inside a Navier-Stokes CFD solver, trying to reduce drag. I extended the solver from one flap to two, built the RL environment and the actor-critic networks, and trained it for 10,000 episodes. In laminar flow it got within 0.003 of the best fixed flap angle. In turbulent flow it didn't converge.",
     tech: ['MATLAB', 'PPO', 'Actor-critic', 'Navier–Stokes CFD'],
     repo: 'https://github.com/Arei1997/Active-Flow-control-Navier-Stokes',
   },
   {
     title: 'Piano Teacher',
     description:
-      'Learn songs key by key: sheet music, an 88-key guide piano and an AI teacher that knows which bar you’re on. AI arrangements and sheet-music transcription from photos, MIDI keyboard input, a falling-notes game mode with grading, and a muscle-memory trainer.',
+      "An app for learning piano songs one key at a time. It shows the sheet music and lights up the keys to press. It can arrange a song for you or read a photo of sheet music, works with a MIDI keyboard, and has a falling-notes game mode and an AI teacher you can ask about the bar you're on.",
     tech: ['React', 'TypeScript', 'FastAPI', 'music21', 'Web MIDI', 'Tone.js'],
     repo: 'https://github.com/Arei1997/piano-teacher',
   },
   {
     title: 'Watson Speech Assistant',
     description:
-      'Voice-controlled React grocery app built at IBM, using Watson speech recognition to make shopping accessible for people with dysarthric speech patterns.',
+      'The voice-controlled grocery app from my IBM internship, built so people with dysarthric speech could shop using their voice.',
     tech: ['React', 'IBM Watson', 'IBM Cloud'],
     repo: 'https://github.com/Arei1997/IBM-Watson-speech-chatbot',
   },
   {
-    title: 'Three-Mode Portfolio',
+    title: 'My Website',
     description:
-      'This site. One portfolio, three interactive themes: a particle wind tunnel with live drag and Reynolds-number physics, a pixel-art runner through Earth’s history, and an FL Studio-style music studio — all synthesised in the browser with no samples.',
+      "This site. It has a theme for each of my hobbies: a wind tunnel with real drag maths, a pixel-art runner game through Earth's history, and a small music studio. All the sound is generated in the browser.",
     tech: ['TypeScript', 'Canvas', 'Web Audio', 'Vite'],
     repo: 'https://github.com/Arei1997/Arei1997.github.io',
   },

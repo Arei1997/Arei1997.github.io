@@ -88,25 +88,25 @@ export function renderSections(el: HTMLElement, theme: ThemeDef, revealed: boole
         ${head('about')}
         <div class="about-grid">
           <div class="about-text ${reveal}">${profile.about.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
-          <div class="about-side">
-            <dl class="facts ${reveal}">
-              ${profile.facts.map((f) => `<div><dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd></div>`).join('')}
-            </dl>
-            <ul class="edu ${reveal}" aria-label="Education">
-              ${education
-                .map(
-                  (e) => `
-                <li>
-                  <span class="edu-period">${esc(e.period)}</span>
-                  <b>${esc(e.degree)}</b>
-                  <span class="edu-school">${esc(e.school)}</span>
-                  <span class="edu-modules">${esc(e.modules)}</span>
-                </li>`,
-                )
-                .join('')}
-            </ul>
-          </div>
+          <dl class="facts ${reveal}">
+            ${profile.facts.map((f) => `<div><dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd></div>`).join('')}
+          </dl>
         </div>
+        <h3 class="about-sub ${reveal}">Education</h3>
+        <ul class="edu">
+          ${education
+            .map(
+              (e) => `
+            <li class="${reveal}">
+              <span class="edu-period">${esc(e.period)}</span>
+              <b>${esc(e.degree)}</b>
+              <span class="edu-school">${esc(e.school)}</span>
+              <span class="edu-modules">${esc(e.modules)}</span>
+            </li>`,
+            )
+            .join('')}
+        </ul>
+        <h3 class="about-sub ${reveal}">Outside work</h3>
         <div class="interests">
           ${THEME_IDS.map((id) => {
             const t = THEMES[id];

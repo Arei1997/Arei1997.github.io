@@ -90,7 +90,7 @@ export const THEMES: Record<ThemeId, ThemeDef> = {
     ctaPrimary: 'See the builds',
     stageLabel: 'Interactive wind tunnel',
     stageHint:
-      'Move your cursor through the tunnel to release smoke. Change the body, air speed and Reynolds number to watch the flow regime, drag and downforce respond — and hold the rev counter to fire up a Mustang 5.0 V8.',
+      'Move your cursor through the tunnel to release smoke, and try changing the body, air speed and Reynolds number. Hold the rev counter to start a Mustang 5.0 V8.',
     contactTitle: "Let's build something fast.",
     kicker: (i, s) => `${pad(i + 1)} — ${GARAGE[s]}`,
     jobLabel: (i, total) => `Stint ${pad(total - i)}`,
@@ -106,7 +106,7 @@ export const THEMES: Record<ThemeId, ThemeDef> = {
     ctaPrimary: 'Select a level',
     stageLabel: 'Playable mini-game',
     stageHint:
-      'Time Runner: click the game, then press Space (or tap) to jump — hold for a higher jump. Run from the molten early Earth through the dinosaurs to the far future. Achievements unlock as you explore.',
+      'Click the game, then press Space or tap to jump. Hold it down to jump higher. You start on the early Earth and run through the dinosaurs into the future.',
     contactTitle: 'Ready for co-op?',
     kicker: (i, s) => `World 1-${i + 1} · ${ARCADE[s]}`,
     jobLabel: (i, total) => `Quest ${pad(total - i)}`,
@@ -122,7 +122,7 @@ export const THEMES: Record<ThemeId, ThemeDef> = {
     ctaPrimary: 'Browse the discography',
     stageLabel: 'Mini music studio',
     stageHint:
-      'A mini DAW: hit play (or Space), paint beats in the channel rack and melodies in the piano roll, or load a pattern. Arm record and jam on the Keys (A W S E D…) or Guitar tab to lay notes straight into the loop.',
+      'Press play (or Space), click squares in the channel rack to make a beat, and add a melody in the piano roll. You can also load a pattern, or hit record and play along on the Keys or Guitar tab.',
     contactTitle: "Let's make something together.",
     kicker: (i, s) => `Track ${pad(i + 1)} · ${STUDIO[s]}`,
     jobLabel: (i) => `Side ${String.fromCharCode(65 + i)}`,

@@ -71,8 +71,10 @@
   color: var(--ok);
 }
 
-[data-theme='arcade'] .interest-name {
+[data-theme='arcade'] .interest-name,
+[data-theme='arcade'] .edu b {
   font-size: 0.85rem;
+  line-height: 1.5;
 }
 
 [data-theme='arcade'] .kicker,
