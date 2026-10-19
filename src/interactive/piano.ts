@@ -3,7 +3,7 @@ import { audio, midiToFreq } from '../lib/audio';
 const NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
 export const noteName = (midi: number) => `${NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`;
 
-const isBlack = (midi: number) => [1, 3, 6, 8, 10].includes(midi % 12);
+export const isBlack = (midi: number) => [1, 3, 6, 8, 10].includes(midi % 12);
 
 // Standard DAW "musical typing" layout: home row = white keys, row above = black keys.
 const KEYMAP: Record<string, number> = {
@@ -26,10 +26,13 @@ const FUR_ELISE: [number | null, number][] = [
 ];
 const SIXTEENTH_MS = 150;
 
-/** Additive piano-ish tone: a few slightly stretched harmonics through a closing low-pass. */
-function playPiano(midi: number, velocity = 0.8): () => void {
+/**
+ * Additive piano-ish tone: a few slightly stretched harmonics through a closing low-pass.
+ * `at` schedules it ahead of time (for the sequencer); `dest` routes it to a mixer channel.
+ */
+export function playPiano(midi: number, velocity = 0.8, at?: number, dest?: AudioNode): () => void {
   const { ctx, master } = audio();
-  const t = ctx.currentTime;
+  const t = at ?? ctx.currentTime;
   const freq = midiToFreq(midi);
 
   const out = ctx.createGain();
@@ -42,7 +45,7 @@ function playPiano(midi: number, velocity = 0.8): () => void {
   lp.type = 'lowpass';
   lp.frequency.setValueAtTime(Math.min(freq * 8, 12000), t);
   lp.frequency.exponentialRampToValueAtTime(Math.max(freq * 2, 400), t + 1.5);
-  lp.connect(out).connect(master);
+  lp.connect(out).connect(dest ?? master);
 
   const oscs = [[1, 1], [2, 0.45], [3, 0.22], [4, 0.12], [5, 0.06]].map(([harmonic, level]) => {
     const osc = ctx.createOscillator();

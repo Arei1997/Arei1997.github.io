@@ -4,7 +4,7 @@ A personal portfolio with three interactive themes, each built around a hobby:
 
 | Theme | Interest | Interactive centrepiece |
 | --- | --- | --- |
-| **Garage** | Cars, mechanics, aerodynamics | Particle wind tunnel with live drag / downforce / power maths, rolling road, smoke wand, and a scroll-driven rev counter you can hold to rev a synthesised V8 |
+| **Garage** | Cars, mechanics, aerodynamics | Particle wind tunnel with live drag / downforce / power maths, rolling road, smoke wand, and a scroll-driven rev counter you can hold to start and rev a synthesised Mustang 5.0 V8 (cross-plane firing order, lumpy idle, rev limiter, overrun crackle) |
 | **Arcade** | Gaming | Pixel-art runner game, XP bar, unlockable achievements and a Konami-code easter egg |
 | **Studio** | Music (piano, guitar) | Playable piano (mouse or computer keyboard) and guitar (Karplus–Strong string synthesis, chord shapes, strum by sweeping), audio visualiser and a "now playing" scroll HUD |
 

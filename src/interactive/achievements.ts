@@ -17,6 +17,8 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'contact', title: 'Party Invite', desc: 'Reach the contact section' },
   { id: 'play', title: 'Insert Coin', desc: 'Start the mini-game' },
   { id: 'score', title: 'High Scorer', desc: 'Score 500+ in the mini-game' },
+  { id: 'extinction', title: 'Extinction Survivor', desc: 'Outrun the asteroid into the Ice Age' },
+  { id: 'future', title: 'Back to the Future', desc: 'Reach the Space Age' },
   { id: 'explorer', title: 'World Traveller', desc: 'Visit all three themes' },
   { id: 'konami', title: 'Old School', desc: '↑ ↑ ↓ ↓ ← → ← → B A' },
 ];

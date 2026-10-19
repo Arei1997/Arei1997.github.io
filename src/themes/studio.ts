@@ -1,6 +1,5 @@
-import { mountGuitar } from '../interactive/guitar';
-import { mountPiano, noteName } from '../interactive/piano';
-import { audioIfReady, midiToFreq } from '../lib/audio';
+import { mountDaw } from '../interactive/daw';
+import { audioIfReady } from '../lib/audio';
 import { pad, visibleLoop } from '../lib/dom';
 import { currentSection, onSectionChange, scrollProgress, type SectionChange } from '../lib/sections';
 import { SECTIONS, SECTION_TITLES, type MountContext } from './index';
@@ -10,9 +9,10 @@ const TRACK_SECONDS = 273;
 
 const clock = (s: number) => `${Math.floor(s / 60)}:${pad(Math.floor(s % 60))}`;
 
+/** Master-bus spectrum meter in the transport bar. */
 function mountVisualizer(canvas: HTMLCanvasElement): () => void {
   const ctx = canvas.getContext('2d')!;
-  const BARS = 48;
+  const BARS = 32;
   let bins: Uint8Array<ArrayBuffer> | null = null;
 
   return visibleLoop(canvas, (_dt, now) => {
@@ -31,11 +31,11 @@ function mountVisualizer(canvas: HTMLCanvasElement): () => void {
 
     const bw = w / BARS;
     for (let i = 0; i < BARS; i++) {
-      const idle = 0.07 + 0.05 * Math.sin(now / 700 + i * 0.45);
+      const idle = 0.06 + 0.04 * Math.sin(now / 700 + i * 0.45);
       // Log-ish spacing so the musically useful low end gets most of the bars.
       const level = bins ? bins[Math.floor((i / BARS) ** 1.7 * bins.length * 0.7)] / 255 : 0;
       const bh = Math.max(idle, level) * h;
-      ctx.fillStyle = level > idle ? '#e8c46a' : 'rgba(232, 196, 106, 0.35)';
+      ctx.fillStyle = level > 0.8 ? '#ffb347' : level > idle ? '#8de08a' : 'rgba(141, 224, 138, 0.25)';
       ctx.fillRect(i * bw + 1, h - bh, Math.max(1, bw - 2), bh);
     }
   });
@@ -108,61 +108,17 @@ function mountHud(hud: HTMLElement): () => void {
 }
 
 export function mount({ stage, hud }: MountContext) {
-  stage.innerHTML = `
-    <div class="studio">
-      <div class="studio-top">
-        <div class="tabs" role="tablist" aria-label="Instrument">
-          <button type="button" role="tab" id="tab-piano" aria-controls="panel-piano" aria-selected="true">Piano</button>
-          <button type="button" role="tab" id="tab-guitar" aria-controls="panel-guitar" aria-selected="false" tabindex="-1">Guitar</button>
-        </div>
-        <output class="lcd">Ready</output>
-      </div>
-      <canvas class="viz" aria-hidden="true"></canvas>
-      <div class="panel" role="tabpanel" id="panel-piano" aria-labelledby="tab-piano"></div>
-      <div class="panel" role="tabpanel" id="panel-guitar" aria-labelledby="tab-guitar" hidden></div>
-    </div>`;
-
-  const lcd = stage.querySelector<HTMLOutputElement>('.lcd')!;
-  const tabs = [...stage.querySelectorAll<HTMLButtonElement>('[role=tab]')];
-  const pianoPanel = stage.querySelector<HTMLElement>('#panel-piano')!;
-  const guitarPanel = stage.querySelector<HTMLElement>('#panel-guitar')!;
-
-  let tab: 'piano' | 'guitar' = 'piano';
   let inView = false;
   const io = new IntersectionObserver(([e]) => (inView = e.isIntersecting));
   io.observe(stage);
 
-  const showNote = (midi: number) => (lcd.textContent = `${noteName(midi)} · ${midiToFreq(midi).toFixed(1)} Hz`);
-  const stopPiano = mountPiano(pianoPanel, { onNote: showNote, isActive: () => inView && tab === 'piano' });
-  const stopGuitar = mountGuitar(guitarPanel, { onNote: showNote, onLabel: (s) => (lcd.textContent = s) });
-
-  const select = (btn: HTMLButtonElement) => {
-    tab = btn.id === 'tab-guitar' ? 'guitar' : 'piano';
-    tabs.forEach((t) => {
-      const on = t === btn;
-      t.setAttribute('aria-selected', String(on));
-      t.tabIndex = on ? 0 : -1;
-    });
-    pianoPanel.hidden = tab !== 'piano';
-    guitarPanel.hidden = tab !== 'guitar';
-  };
-  tabs.forEach((t, i) => {
-    t.addEventListener('click', () => select(t));
-    t.addEventListener('keydown', (e) => {
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
-      next.focus();
-      select(next);
-    });
-  });
-
+  const stopDaw = mountDaw(stage, { inView: () => inView });
   const stopViz = mountVisualizer(stage.querySelector<HTMLCanvasElement>('.viz')!);
   const stopHud = mountHud(hud);
 
   return () => {
     io.disconnect();
-    stopPiano();
-    stopGuitar();
+    stopDaw();
     stopViz();
     stopHud();
     stage.replaceChildren();

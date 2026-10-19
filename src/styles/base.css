@@ -323,42 +323,51 @@ button {
   gap: 12px;
 }
 
+/* Deliberately quiet: discoverable at the top of the hero without competing with the name. */
 .hero-modes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-top: 32px;
-  font-size: 0.85rem;
+  gap: 6px;
+  margin: 0 0 28px;
+  font-size: 0.74rem;
   color: var(--muted);
+}
+
+.hero-modes > span {
+  margin-right: 2px;
+  letter-spacing: 0.04em;
 }
 
 .mode-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px 5px 9px;
-  border: 1px solid var(--line-strong);
+  gap: 5px;
+  padding: 3px 10px 3px 8px;
+  border: 1px solid var(--line);
   border-radius: 999px;
   background: transparent;
-  font-size: 0.82rem;
+  color: var(--muted);
+  font-size: 0.74rem;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s, background-color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background-color 0.15s;
 }
 
 .mode-pill svg {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
 }
 
 .mode-pill:hover {
-  border-color: var(--accent);
+  border-color: var(--line-strong);
+  color: var(--text);
 }
 
 .mode-pill[aria-pressed='true'] {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--text);
 }
 
 .hero-stage {
@@ -472,6 +481,7 @@ button {
 
 .card,
 .facts,
+.edu li,
 .job,
 .project,
 .skill-group,
@@ -538,6 +548,49 @@ button {
   margin: 0;
   font-weight: 600;
   text-align: right;
+}
+
+.about-side {
+  display: grid;
+  gap: 16px;
+}
+
+.edu {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.edu li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 20px;
+}
+
+.edu-period {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.edu b {
+  font-size: 1.02rem;
+}
+
+.edu-school {
+  font-weight: 500;
+}
+
+.edu-modules {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
 }
 
 .interests {

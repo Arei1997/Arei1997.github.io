@@ -1,19 +1,26 @@
 import { prefersReducedMotion, visibleLoop } from '../lib/dom';
 
 type Pt = [number, number];
+type Circle = [number, number, number];
 
 interface Body {
   id: string;
   label: string;
+  /** Drag coefficient at full-scale Reynolds number (~10⁷). */
   cd: number;
   /** Downforce coefficient; negative means the body generates lift. */
   cl: number;
-  /** Frontal (or planform, for the wing) reference area in m². */
+  /** Reference area in m² (frontal, or planform for the wing). */
   area: number;
-  /** Outline in body-length units: x 0→1 nose to tail, y down, centred on 0. */
-  shape: Pt[];
+  /** Real-world length in metres, used to turn Re into an equivalent fluid viscosity. */
+  length: number;
+  /** Wetted-to-reference area ratio — how much surface skin friction acts on. */
+  wetted: number;
+  /** Outlines in body-length units: x 0→1 nose to tail, y down. */
+  shapes: Pt[][];
   wheels: Pt[];
   wheelR: number;
+  helmet?: Circle;
   grounded: boolean;
   /** Fraction of the canvas width the body occupies. */
   scale: number;
@@ -41,17 +48,21 @@ interface Particle {
   s: number;
   seed: number;
   life: number;
+  stuck: number;
 }
 
 const CELL = 8;
 const RAKE_GAP = 13;
 const BG = '#0a0b0e';
 const RHO = 1.225;
+const RE_REF = 1e7;
 // Slow (blue) → fast (red), like a CFD velocity plot.
-const SPEED_COLOURS = ['#3a6df0', '#2f9bff', '#22c7e0', '#34e0a1', '#b8e34a', '#ffd000', '#ff8a1f', '#ff3b30'];
+const SPEED_COLOURS = ['#6f8cff', '#4fb0ff', '#2fd3ea', '#3ee6a8', '#b8e34a', '#ffd000', '#ff8a1f', '#ff3b30'];
 
 /** Converts an outline drawn in a 0→1 box into body-length units with the given height/length ratio. */
 const fromBox = (aspect: number, pts: Pt[]): Pt[] => pts.map(([x, y]) => [x, (y - 0.5) * aspect]);
+/** Converts (x, height above ground) pairs into y-down coordinates. */
+const side = (pts: Pt[]): Pt[] => pts.map(([x, h]) => [x, -h]);
 
 /** NACA 4412 profile, flipped to make downforce and set at 8° angle of attack. */
 function invertedWing(): Pt[] {
@@ -76,21 +87,38 @@ function invertedWing(): Pt[] {
   return [...upper.reverse(), ...lower.slice(1)].map(rotate);
 }
 
+// Ground-effect era F1 car in side profile, ~5.6 m long. 1 unit = car length.
+const F1_SHAPES: Pt[][] = [
+  // Chassis: nose, cockpit and halo, airbox, engine cover, diffuser ramp, floor.
+  side([
+    [0.02, 0.055], [0.1, 0.078], [0.28, 0.105], [0.38, 0.12], [0.43, 0.155], [0.49, 0.158],
+    [0.52, 0.172], [0.57, 0.172], [0.64, 0.14], [0.76, 0.1], [0.88, 0.07], [0.91, 0.058],
+    [0.94, 0.05], [0.85, 0.014], [0.25, 0.014], [0.24, 0.032], [0.1, 0.045],
+  ]),
+  // Front wing main plane and flap.
+  side([[0, 0.016], [0.05, 0.024], [0.11, 0.022], [0.11, 0.015], [0.05, 0.011], [0, 0.012]]),
+  side([[0.075, 0.031], [0.115, 0.05], [0.122, 0.045], [0.085, 0.026]]),
+  // Rear wing pillar, main plane and DRS flap.
+  side([[0.925, 0.06], [0.932, 0.06], [0.938, 0.146], [0.931, 0.146]]),
+  side([[0.875, 0.148], [0.92, 0.158], [0.968, 0.162], [0.968, 0.154], [0.92, 0.146], [0.88, 0.142]]),
+  side([[0.948, 0.17], [0.99, 0.19], [0.997, 0.184], [0.958, 0.164]]),
+];
+
 const BODIES: Body[] = [
   {
-    id: 'coupe',
-    label: 'GT coupé',
-    cd: 0.31,
-    cl: 0.15,
-    area: 2.0,
+    id: 'f1',
+    label: 'F1 car',
+    cd: 0.95,
+    cl: 3.0,
+    area: 1.5,
+    length: 5.6,
+    wetted: 6,
     grounded: true,
-    scale: 0.56,
-    wheelR: 0.075,
-    wheels: [[0.19, 0.087], [0.81, 0.087]],
-    shape: fromBox(0.29, [
-      [0, 0.8], [0.015, 0.62], [0.08, 0.54], [0.27, 0.46], [0.4, 0.18], [0.5, 0.06], [0.63, 0.06],
-      [0.76, 0.24], [0.93, 0.33], [1, 0.36], [0.995, 0.7], [0.97, 0.84], [0.03, 0.86],
-    ]),
+    scale: 0.74,
+    wheelR: 0.064,
+    wheels: [[0.16, -0.064], [0.8, -0.064]],
+    helmet: [0.452, -0.142, 0.019],
+    shapes: F1_SHAPES,
   },
   {
     id: 'wing',
@@ -98,11 +126,13 @@ const BODIES: Body[] = [
     cd: 0.12,
     cl: 1.4,
     area: 1.0,
+    length: 0.5,
+    wetted: 2.2,
     grounded: false,
     scale: 0.46,
     wheelR: 0,
     wheels: [],
-    shape: invertedWing(),
+    shapes: [invertedWing()],
   },
   {
     id: 'van',
@@ -110,15 +140,50 @@ const BODIES: Body[] = [
     cd: 0.58,
     cl: -0.05,
     area: 7.2,
+    length: 5.5,
+    wetted: 4,
     grounded: true,
     scale: 0.5,
     wheelR: 0.07,
     wheels: [[0.17, 0.19], [0.83, 0.19]],
-    shape: fromBox(0.48, [[0, 0.9], [0, 0.14], [0.025, 0.03], [0.07, 0], [1, 0], [1, 0.9]]),
+    shapes: [fromBox(0.48, [[0, 0.9], [0, 0.14], [0.025, 0.03], [0.07, 0], [1, 0], [1, 0.9]])],
   },
 ];
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-GB');
+const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
+const smoothstep = (a: number, b: number, x: number) => {
+  const t = clamp01((x - a) / (b - a));
+  return t * t * (3 - 2 * t);
+};
+
+/** Flat-plate skin-friction coefficient: Blasius (laminar) below transition, Prandtl (turbulent) above. */
+const skinFriction = (re: number) => (re < 5e5 ? 1.328 / Math.sqrt(re) : 0.074 / re ** 0.2);
+const dragAt = (b: Body, re: number) => b.cd + b.wetted * (skinFriction(re) - skinFriction(RE_REF));
+// Lift collapses as viscosity starts to dominate the flow.
+const liftAt = (b: Body, re: number) => b.cl * Math.max(0.15, Math.min(1, (Math.log10(re) - 2) / 3.5));
+
+function regime(re: number) {
+  if (re < 40) return 'Creeping flow';
+  if (re < 2e5) return 'Laminar · vortex shedding';
+  if (re < 5e5) return 'Transitional';
+  return 'Turbulent';
+}
+
+/** Names a real fluid with roughly the kinematic viscosity implied by this Re, speed and size. */
+function fluidLike(nu: number) {
+  if (nu < 4e-6) return 'water';
+  if (nu < 1e-4) return 'air';
+  if (nu < 1e-3) return 'motor oil';
+  if (nu < 1e-2) return 'honey';
+  if (nu < 1) return 'molten glass';
+  return 'tar';
+}
+
+function formatRe(re: number) {
+  const exp = Math.floor(Math.log10(re));
+  return `${(re / 10 ** exp).toFixed(1)} × 10<sup>${exp}</sup>`;
+}
 
 export function mountWindTunnel(stage: HTMLElement): () => void {
   stage.innerHTML = `
@@ -137,52 +202,75 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
         <div class="seg" role="group" aria-label="Test body">
           ${BODIES.map((b, i) => `<button type="button" data-body="${b.id}" aria-pressed="${i === 0}">${b.label}</button>`).join('')}
         </div>
-        <label class="tunnel-speed">
-          <span>Air speed</span>
-          <input type="range" min="40" max="320" step="5" value="160" />
-          <output>160 km/h</output>
-        </label>
         <button type="button" class="tunnel-mode" aria-pressed="false">Smoke rake</button>
+        <label class="tunnel-slider">
+          <span>Air speed</span>
+          <input type="range" data-speed min="40" max="360" step="5" value="160" />
+          <output data-speed-out>160 km/h</output>
+        </label>
+        <label class="tunnel-slider">
+          <span>Reynolds no.</span>
+          <input type="range" data-re min="1" max="8" step="0.05" value="7" />
+          <output data-re-out></output>
+        </label>
+        <p class="tunnel-regime" data-regime aria-live="polite"></p>
       </div>
     </div>`;
 
   const canvas = stage.querySelector<HTMLCanvasElement>('canvas')!;
   const ctx = canvas.getContext('2d')!;
-  const speedInput = stage.querySelector<HTMLInputElement>('input[type=range]')!;
-  const speedOut = stage.querySelector<HTMLOutputElement>('.tunnel-speed output')!;
+  const speedInput = stage.querySelector<HTMLInputElement>('[data-speed]')!;
+  const speedOut = stage.querySelector<HTMLOutputElement>('[data-speed-out]')!;
+  const reInput = stage.querySelector<HTMLInputElement>('[data-re]')!;
+  const reOut = stage.querySelector<HTMLOutputElement>('[data-re-out]')!;
+  const regimeEl = stage.querySelector<HTMLElement>('[data-regime]')!;
   const modeBtn = stage.querySelector<HTMLButtonElement>('.tunnel-mode')!;
   const readout = (key: string) => stage.querySelector<HTMLElement>(`[data-r="${key}"]`)!;
 
   const reduced = prefersReducedMotion();
   let body = BODIES[0];
   let kmh = 160;
+  let logRe = 7;
   let smoke = false;
-  let w = 0, h = 0, len = 0, groundY = Infinity;
-  let poly: Pt[] = [];
-  let wheels: [number, number, number][] = [];
+  let w = 0, h = 0, len = 0, groundY = Infinity, flowSpeed = 0;
+  let polys: Pt[][] = [];
+  let wheels: Circle[] = [];
+  let helmet: Circle | null = null;
   let bb = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
   let field: Field | null = null;
   let particles: Particle[] = [];
   let wand: Particle[] = [];
   let pointer: Pt | null = null;
   let road = 0, spin = 0, time = 0, warmup = 0;
+  // How much of the wake is a regular vortex street vs chaotic turbulence at the current Re.
+  let turbulentMix = 1, sheddingMix = 0;
 
+  const re = () => 10 ** logRe;
+
+  /** Signed distance to the nearest surface (negative inside) plus the outward surface normal. */
   function sdf(px: number, py: number) {
-    let best = Infinity, qx = 0, qy = 0, inside = false;
-    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-      const [ax, ay] = poly[j];
-      const [bx, by] = poly[i];
-      if (by > py !== ay > py && px < ((ax - bx) * (py - by)) / (ay - by) + bx) inside = !inside;
-      const ex = bx - ax, ey = by - ay;
-      const t = Math.max(0, Math.min(1, ((px - ax) * ex + (py - ay) * ey) / (ex * ex + ey * ey)));
-      const cx = ax + ex * t, cy = ay + ey * t;
-      const d2 = (px - cx) ** 2 + (py - cy) ** 2;
-      if (d2 < best) { best = d2; qx = cx; qy = cy; }
+    let d = Infinity, nx = 0, ny = -1;
+    for (const poly of polys) {
+      let best = Infinity, qx = 0, qy = 0, inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const [ax, ay] = poly[j];
+        const [bx, by] = poly[i];
+        if (by > py !== ay > py && px < ((ax - bx) * (py - by)) / (ay - by) + bx) inside = !inside;
+        const ex = bx - ax, ey = by - ay;
+        const t = Math.max(0, Math.min(1, ((px - ax) * ex + (py - ay) * ey) / (ex * ex + ey * ey)));
+        const cx = ax + ex * t, cy = ay + ey * t;
+        const d2 = (px - cx) ** 2 + (py - cy) ** 2;
+        if (d2 < best) { best = d2; qx = cx; qy = cy; }
+      }
+      const dist = Math.sqrt(best);
+      const sd = inside ? -dist : dist;
+      if (sd < d) {
+        d = sd;
+        const sign = inside ? -1 : 1;
+        nx = dist > 1e-6 ? ((px - qx) / dist) * sign : 0;
+        ny = dist > 1e-6 ? ((py - qy) / dist) * sign : -1;
+      }
     }
-    let d = Math.sqrt(best);
-    let nx = d > 1e-6 ? (px - qx) / d : 0;
-    let ny = d > 1e-6 ? (py - qy) / d : -1;
-    if (inside) { d = -d; nx = -nx; ny = -ny; }
     for (const [cx, cy, r] of wheels) {
       const dc = Math.hypot(px - cx, py - cy);
       if (dc - r < d) {
@@ -195,9 +283,10 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
   }
 
   /**
-   * Builds an approximate steady flow field: freestream deflected around the body's surface,
-   * accelerated where it runs tangentially (over the roof), slowed into a turbulent wake behind it,
-   * and turned upward behind a downforce-producing body. Not CFD — but it reads like a smoke tunnel.
+   * Builds an approximate steady flow field: freestream deflected around the body, accelerated where
+   * it runs tangentially, slowed by a boundary layer whose thickness scales with 1/√Re, dragged into a
+   * wake behind the body and turned upward behind a downforce-producing body. Not CFD — but the trends
+   * (and the regime changes as Re varies) read like a real smoke tunnel.
    */
   function buildField(): Field {
     const cols = Math.ceil(w / CELL) + 1, rows = Math.ceil(h / CELL) + 1, n = cols * rows;
@@ -208,7 +297,11 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
       dist: new Float32Array(n), wake: new Float32Array(n),
       speed: new Float32Array(n), solid: new Uint8Array(n),
     };
-    const reach = len * 0.09;
+    const viscous = clamp01((5 - logRe) / 4);
+    const reach = len * 0.09 * (1 + 1.8 * viscous);
+    const boundaryLayer = len * Math.min(0.25, 3 / Math.sqrt(re()));
+    const cd = dragAt(body, re());
+    const cl = liftAt(body, re());
     const rearX = bb.maxX - len * 0.04;
     const midY = (bb.minY + bb.maxY) / 2, halfH = (bb.maxY - bb.minY) / 2;
 
@@ -225,23 +318,30 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
         const k = nx < 0 ? near : near * 0.55;
         let ux = 1 - nx * nx * k;
         let uy = -nx * ny * k;
-        // Split the flow above/below the stagnation point instead of letting it stall there.
-        if (nx < 0) uy += Math.sign(py - midY || 1) * near * 0.3 * -nx;
-        const boost = 1 + 0.5 * near * (1 - Math.abs(nx));
+        // Split the flow around the stagnation point instead of letting it stall there. A car sits on
+        // the road, so its air has to go up and over; a free-standing wing splits above and below.
+        const split = body.grounded ? -1 : Math.sign(py - midY || 1);
+        if (nx < 0) uy += split * near * 0.3 * -nx;
+        const boost = 1 + 0.5 * near * (1 - Math.abs(nx)) * (1 - viscous * 0.7);
         ux *= boost; uy *= boost;
 
         let wake = 0;
         if (px > rearX) {
           const dx = px - rearX, spread = halfH * (1 + (dx / len) * 0.6), dy = Math.abs(py - midY);
-          if (dy < spread) wake = body.cd * Math.exp(-dx / (len * 0.9)) * (1 - dy / spread);
+          if (dy < spread) wake = Math.min(1.2, cd) * Math.exp(-dx / (len * 0.9)) * (1 - dy / spread);
         }
-        const along = Math.max(0, Math.min(1, (px - bb.minX) / len));
-        uy -= body.cl * 0.1 * Math.exp(-Math.hypot(px - bb.maxX, py - midY) / (len * 0.5)) * (0.3 + 0.7 * along);
+        // Downforce means air is thrown upward — a "rooster tail" rising off the back of the body.
+        const behind = smoothstep(bb.maxX - len * 0.25, bb.maxX, px);
+        uy -= Math.min(cl, 2) * 0.08 * behind * Math.exp(-Math.abs(py - bb.minY) / (len * 0.2)) * Math.exp(-Math.max(0, px - bb.maxX) / (len * 0.7));
 
-        const slow = 1 - Math.min(0.75, wake * 1.3);
+        // No-slip wall: air right at the surface is slowed by the boundary layer.
+        const wall = 0.08 + 0.92 * (1 - Math.exp(-d / boundaryLayer));
+        // The road is a wall too: nothing flows down into it.
+        if (py > groundY - CELL * 2) uy = Math.min(uy, 0);
+        const slow = (1 - Math.min(0.75, wake * 1.3)) * wall;
         f.vx[i] = ux * slow;
         f.vy[i] = uy * slow;
-        f.wake[i] = wake;
+        f.wake[i] = wake * (1 - viscous * 0.8);
         f.speed[i] = Math.hypot(f.vx[i], f.vy[i]);
       }
     }
@@ -260,7 +360,14 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
     p.px = p.x; p.py = p.y;
     p.seed = Math.random() * Math.PI * 2;
     p.life = Infinity;
+    p.stuck = 0;
     p.s = 1;
+  }
+
+  function rebuild() {
+    turbulentMix = smoothstep(5, 5.8, logRe);
+    sheddingMix = smoothstep(1.6, 2.4, logRe) * (1 - turbulentMix);
+    field = buildField();
   }
 
   function layout() {
@@ -274,20 +381,22 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
 
     len = Math.min(w * body.scale, h * 1.6);
     const x0 = (w - len) * 0.42;
-    const maxY = Math.max(...body.shape.map((p) => p[1]), ...body.wheels.map((p) => p[1] + body.wheelR));
+    const allY = [...body.shapes.flat().map((p) => p[1]), ...body.wheels.map((p) => p[1] + body.wheelR)];
     groundY = body.grounded ? h * 0.8 : Infinity;
-    const cy = body.grounded ? groundY - maxY * len : h * 0.5;
-    poly = body.shape.map(([x, y]) => [x0 + x * len, cy + y * len]);
-    wheels = body.wheels.map(([x, y]) => [x0 + x * len, cy + y * len, body.wheelR * len]);
+    const cy = body.grounded ? groundY - Math.max(...allY) * len : h * 0.5;
+    const toPx = ([x, y]: Pt): Pt => [x0 + x * len, cy + y * len];
+    polys = body.shapes.map((shape) => shape.map(toPx));
+    wheels = body.wheels.map((p) => [...toPx(p), body.wheelR * len] as Circle);
+    helmet = body.helmet ? ([...toPx([body.helmet[0], body.helmet[1]]), body.helmet[2] * len] as Circle) : null;
 
-    const xs = [...poly.map((p) => p[0]), ...wheels.flatMap(([x, , r]) => [x - r, x + r])];
-    const ys = [...poly.map((p) => p[1]), ...wheels.flatMap(([, y, r]) => [y - r, y + r])];
+    const xs = [...polys.flat().map((p) => p[0]), ...wheels.flatMap(([x, , r]) => [x - r, x + r])];
+    const ys = [...polys.flat().map((p) => p[1]), ...wheels.flatMap(([, y, r]) => [y - r, y + r])];
     bb = { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
 
-    field = buildField();
+    rebuild();
     const count = Math.round(Math.min(900, Math.max(260, (w * h) / 420)));
     particles = Array.from({ length: count }, () => {
-      const p: Particle = { x: 0, y: 0, px: 0, py: 0, s: 1, seed: 0, life: Infinity };
+      const p: Particle = { x: 0, y: 0, px: 0, py: 0, s: 1, seed: 0, life: Infinity, stuck: 0 };
       spawn(p, true);
       return p;
     });
@@ -297,7 +406,7 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
     ctx.fillRect(0, 0, w, h);
   }
 
-  function advance(p: Particle, f: Field, speed: number, dt: number): boolean {
+  function advance(p: Particle, f: Field, dt: number): boolean {
     p.px = p.x; p.py = p.y;
     const c = Math.min(f.cols - 1, Math.max(0, Math.round(p.x / CELL)));
     const r = Math.min(f.rows - 1, Math.max(0, Math.round(p.y / CELL)));
@@ -312,31 +421,40 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
     let vx = f.vx[i], vy = f.vy[i];
     const wk = f.wake[i];
     if (wk > 0) {
-      const t = time * 7 + p.seed;
-      vy += Math.sin(t + p.x * 0.045) * wk * 1.4;
-      vx += Math.cos(t * 1.3) * wk * 0.5;
+      if (turbulentMix > 0) {
+        const t = time * 7 + p.seed;
+        vy += Math.sin(t + p.x * 0.045) * wk * 1.4 * turbulentMix;
+        vx += Math.cos(t * 1.3) * wk * 0.5 * turbulentMix;
+      }
+      if (sheddingMix > 0) {
+        // Kármán vortex street: a travelling wave shed at Strouhal number ≈ 0.2.
+        const omega = (2 * Math.PI * 0.2 * flowSpeed) / Math.max(20, bb.maxY - bb.minY);
+        vy += Math.sin(time * omega - (p.x * omega) / (0.85 * flowSpeed)) * wk * 1.6 * sheddingMix;
+      }
     }
     p.s = f.speed[i];
-    p.x += vx * speed * dt;
-    p.y += vy * speed * dt;
+    p.x += vx * flowSpeed * dt;
+    p.y += vy * flowSpeed * dt;
     p.life -= dt;
-    return !(p.x > w + 4 || p.y < -4 || p.y > airBottom() || p.life <= 0);
+    // Particles parked at a stagnation point would otherwise sit there forever, starving the flow.
+    p.stuck = p.s < 0.2 ? p.stuck + dt : 0;
+    return !(p.x > w + 4 || p.y < -4 || p.y > airBottom() || p.life <= 0 || p.stuck > 1);
   }
 
   function step(dt: number) {
     if (!field) return;
     time += dt;
-    const speed = (kmh / 160) * w * 0.32;
-    road = (road + speed * dt) % 40;
-    if (wheels.length) spin += (speed * dt) / wheels[0][2];
+    flowSpeed = (kmh / 160) * w * 0.32;
+    road = (road + flowSpeed * dt) % 40;
+    if (wheels.length) spin += (flowSpeed * dt) / wheels[0][2];
 
-    for (const p of particles) if (!advance(p, field, speed, dt)) spawn(p, false);
+    for (const p of particles) if (!advance(p, field, dt)) spawn(p, false);
     if (pointer && wand.length < 260) {
       for (let k = 0; k < 4; k++) {
-        wand.push({ x: pointer[0], y: pointer[1] + (Math.random() - 0.5) * 3, px: pointer[0], py: pointer[1], s: 1, seed: Math.random() * 6, life: 2.5 });
+        wand.push({ x: pointer[0], y: pointer[1] + (Math.random() - 0.5) * 3, px: pointer[0], py: pointer[1], s: 1, seed: Math.random() * 6, life: 2.5, stuck: 0 });
       }
     }
-    wand = wand.filter((p) => advance(p, field!, speed, dt));
+    wand = wand.filter((p) => advance(p, field!, dt));
   }
 
   function strokeAll(list: Particle[]) {
@@ -378,14 +496,27 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
       for (let x = -road; x < w; x += 40) ctx.fillRect(x, groundY + 8, 20, 2);
     }
 
-    ctx.beginPath();
-    poly.forEach(([x, y], k) => (k ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-    ctx.closePath();
     ctx.fillStyle = '#1a1e25';
-    ctx.fill();
-    ctx.lineWidth = 1.6;
     ctx.strokeStyle = '#ff3b30';
-    ctx.stroke();
+    ctx.lineWidth = 1.6;
+    ctx.lineJoin = 'round';
+    for (const poly of polys) {
+      ctx.beginPath();
+      poly.forEach(([x, y], k) => (k ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    if (helmet) {
+      const [hx, hy, hr] = helmet;
+      ctx.beginPath();
+      ctx.arc(hx, hy, hr, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffcc00';
+      ctx.fill();
+      ctx.fillStyle = '#0a0b0e';
+      ctx.fillRect(hx - hr * 0.95, hy - hr * 0.25, hr * 1.1, hr * 0.45);
+    }
 
     for (const [cx, cy, r] of wheels) {
       ctx.beginPath();
@@ -395,13 +526,18 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
       ctx.lineWidth = 3;
       ctx.strokeStyle = '#2f343d';
       ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.62, 0, Math.PI * 2);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#ff3b30';
+      ctx.stroke();
       ctx.lineWidth = 1.5;
       ctx.strokeStyle = '#8a93a3';
       ctx.beginPath();
       for (let k = 0; k < 5; k++) {
         const a = spin + (k * Math.PI * 2) / 5;
         ctx.moveTo(cx + Math.cos(a) * r * 0.18, cy + Math.sin(a) * r * 0.18);
-        ctx.lineTo(cx + Math.cos(a) * r * 0.62, cy + Math.sin(a) * r * 0.62);
+        ctx.lineTo(cx + Math.cos(a) * r * 0.55, cy + Math.sin(a) * r * 0.55);
       }
       ctx.stroke();
     }
@@ -410,14 +546,19 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
   function updateReadout() {
     const v = kmh / 3.6;
     const q = 0.5 * RHO * v * v;
-    const drag = q * body.cd * body.area;
-    const down = q * body.cl * body.area;
+    const cd = dragAt(body, re());
+    const drag = q * cd * body.area;
+    const down = q * liftAt(body, re()) * body.area;
     const kw = (drag * v) / 1000;
-    readout('cd').textContent = body.cd.toFixed(2);
+    readout('cd').textContent = cd.toFixed(2);
     readout('drag').innerHTML = `${fmt(drag)}<small>N</small>`;
     readout('down-label').textContent = down < 0 ? 'Lift' : 'Downforce';
     readout('down').innerHTML = `${fmt(Math.abs(down))}<small>N · ${fmt(Math.abs(down) / 9.81)} kg</small>`;
     readout('power').innerHTML = `${fmt(kw)}<small>kW · ${fmt(kw * 1.341)} hp</small>`;
+
+    reOut.innerHTML = formatRe(re());
+    const nu = (v * body.length) / re();
+    regimeEl.textContent = `${regime(re())} · at ${kmh} km/h the fluid would be about as viscous as ${fluidLike(nu)}`;
   }
 
   const stopLoop = visibleLoop(canvas, (dt) => {
@@ -444,6 +585,14 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
     updateReadout();
   });
 
+  let pendingField = 0;
+  reInput.addEventListener('input', () => {
+    logRe = Number(reInput.value);
+    updateReadout();
+    cancelAnimationFrame(pendingField);
+    pendingField = requestAnimationFrame(rebuild);
+  });
+
   modeBtn.addEventListener('click', () => {
     smoke = !smoke;
     modeBtn.setAttribute('aria-pressed', String(smoke));
@@ -457,10 +606,10 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
   canvas.addEventListener('pointerleave', () => (pointer = null));
   canvas.addEventListener('pointercancel', () => (pointer = null));
 
-  let pending = 0;
+  let pendingLayout = 0;
   const ro = new ResizeObserver(() => {
-    cancelAnimationFrame(pending);
-    pending = requestAnimationFrame(layout);
+    cancelAnimationFrame(pendingLayout);
+    pendingLayout = requestAnimationFrame(layout);
   });
   ro.observe(canvas);
 
@@ -470,7 +619,8 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
   return () => {
     stopLoop();
     ro.disconnect();
-    cancelAnimationFrame(pending);
+    cancelAnimationFrame(pendingLayout);
+    cancelAnimationFrame(pendingField);
     stage.replaceChildren();
   };
 }
