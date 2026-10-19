@@ -49,7 +49,7 @@ export const profile = {
     "Software engineer working on various critical HMRC systems. I studied aerospace engineering with a master's in computer science at UCL, I build AI projects in my spare time, and outside work it's mostly cars, games and music!",
   email: 'Arei1997@hotmail.co.uk',
   /** Put a PDF in /public (e.g. public/cv.pdf) and set this to '/cv.pdf'. Leave empty to hide the button. */
-  cv: '',
+  cv: '/cv.pdf',
   links: [
     { label: 'GitHub', href: 'https://github.com/Arei1997' },
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/arei1/' },
@@ -161,7 +161,7 @@ export const projects: Project[] = [
     description:
       "A PPO agent that moves two hinged flaps on a cylinder inside a Navier-Stokes CFD solver, trying to reduce drag. I extended the solver from one flap to two, built the RL environment and the actor-critic networks, and trained it for 10,000 episodes. In laminar flow it got within 0.003 of the best fixed flap angle. In turbulent flow it didn't converge.",
     tech: ['MATLAB', 'PPO', 'Actor-critic', 'Navier–Stokes CFD'],
-    repo: 'https://github.com/Arei1997/Active-Flow-control-Navier-Stokes',
+    repo: 'https://github.com/Arei1997/Active-Flow-control-Navier-Stokes/tree/python-port',
   },
   {
     title: 'Piano Teacher',
