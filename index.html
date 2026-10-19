@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" data-theme="garage">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{name}} — {{role}}</title>
+    <meta name="description" content="{{tagline}}" />
+    <meta name="author" content="{{name}}" />
+    <link rel="canonical" href="{{siteUrl}}/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{name}} — {{role}}" />
+    <meta property="og:description" content="{{tagline}}" />
+    <meta property="og:url" content="{{siteUrl}}/" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&family=Press+Start+2P&display=swap"
+    />
+    <script>
+      // Apply the saved theme before first paint so there's no flash of the default one.
+      (function () {
+        var ids = ['garage', 'arcade', 'studio'];
+        var theme = 'garage';
+        try {
+          var fromUrl = new URLSearchParams(location.search).get('theme');
+          var saved = JSON.parse(localStorage.getItem('theme') || 'null');
+          theme = ids.indexOf(fromUrl) > -1 ? fromUrl : ids.indexOf(saved) > -1 ? saved : theme;
+        } catch (e) {}
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="topbar"></header>
+    <main id="main">
+      <section id="top" class="hero" aria-label="Introduction"></section>
+      <div id="sections"></div>
+    </main>
+    <footer class="footer"></footer>
+    <div id="hud"></div>
+    <noscript><p class="noscript">This portfolio is interactive and needs JavaScript enabled.</p></noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
