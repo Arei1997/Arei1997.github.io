@@ -60,9 +60,9 @@ export const profile = {
   ],
   facts: [
     { label: 'Based in', value: 'Manchester, UK' },
-    { label: 'Currently', value: 'Mercator Digital · HMRC' },
-    { label: 'Focus', value: 'Scala APIs · AI systems' },
-    { label: 'Off the clock', value: 'Cars · Games · Music' },
+    { label: 'Current Position', value: 'Software engineer @ Mercator Digital/HMRC' },
+    { label: 'Focus', value: 'Software Engineering · Architecture · AI/ML' },
+    { label: 'Hobbies', value: 'Cars · Games · Music' },
   ],
   interests: {
     garage:
@@ -111,7 +111,7 @@ export const experience: Experience[] = [
     period: 'Jul 2023 – Sep 2023',
     location: 'London, UK',
     summary:
-      'On an industry exchange programme, I built a grocery app that people with dysarthric speech could use with their voice.',
+      'In collaboration with my thesis, I built a grocery app that people with dysarthric speech could use with their voice.',
     highlights: [
       'Added IBM Watson speech recognition to a React app so it could be used entirely by voice.',
       'Trained and deployed the Watson actions on IBM Cloud.',
