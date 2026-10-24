@@ -45,6 +45,8 @@ export const profile = {
   location: 'Manchester, UK',
   /** Final public URL, no trailing slash — used for SEO tags. */
   siteUrl: 'https://arei1997.github.io',
+  /** GoatCounter site code (the "xyz" in xyz.goatcounter.com). Stats are private to your dashboard. Leave empty to disable. */
+  goatcounter: '',
   tagline:
     "Software engineer working on various critical HMRC systems. I studied aerospace engineering with a master's in computer science at UCL, I build AI projects in my spare time, and outside work it's mostly cars, games and music!",
   email: 'Arei1997@hotmail.co.uk',

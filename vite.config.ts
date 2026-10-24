@@ -18,5 +18,24 @@ export default defineConfig({
         });
       },
     },
+    {
+      // Private visitor count via GoatCounter — production builds only, so dev reloads aren't counted.
+      name: 'goatcounter',
+      apply: 'build',
+      transformIndexHtml() {
+        if (!profile.goatcounter) return;
+        return [
+          {
+            tag: 'script',
+            attrs: {
+              'data-goatcounter': `https://${profile.goatcounter}.goatcounter.com/count`,
+              async: true,
+              src: 'https://gc.zgo.at/count.js',
+            },
+            injectTo: 'head',
+          },
+        ];
+      },
+    },
   ],
 });
