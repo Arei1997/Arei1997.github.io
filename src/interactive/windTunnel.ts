@@ -190,7 +190,6 @@ export function mountWindTunnel(stage: HTMLElement): () => void {
     <div class="tunnel">
       <div class="tunnel-view">
         <canvas class="tunnel-canvas" aria-label="Animated airflow around the selected body"></canvas>
-        <span class="tunnel-tag"><i></i>Wind tunnel · live</span>
       </div>
       <dl class="tunnel-readout">
         <div><dt>Drag coeff.</dt><dd data-r="cd"></dd></div>

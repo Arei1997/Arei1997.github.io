@@ -18,7 +18,6 @@ const topbar = document.querySelector<HTMLElement>('.topbar')!;
 const hero = document.querySelector<HTMLElement>('#top')!;
 const sections = document.querySelector<HTMLElement>('#sections')!;
 const footer = document.querySelector<HTMLElement>('.footer')!;
-const hud = document.querySelector<HTMLElement>('#hud')!;
 
 let active: ThemeId | null = null;
 let unmount: (() => void) | null = null;
@@ -37,11 +36,10 @@ function render(id: ThemeId, revealed: boolean) {
   unmount?.();
   unmount = null;
   unobserve?.();
-  hud.replaceChildren();
 
   root.dataset.theme = id;
   renderHero(hero, THEMES[id]);
-  renderSections(sections, THEMES[id], revealed);
+  renderSections(sections, revealed);
   topbar.querySelectorAll<HTMLElement>('[data-switch-theme]').forEach((b) => {
     b.setAttribute('aria-pressed', String(b.dataset.switchTheme === id));
   });
@@ -55,9 +53,6 @@ async function setTheme(id: ThemeId, animate: boolean) {
   const gen = ++generation;
 
   store.set('theme', id);
-  const visited = new Set(store.get<string[]>('themes:visited', []));
-  visited.add(id);
-  store.set('themes:visited', [...visited]);
 
   if (!isFirst) {
     const url = new URL(location.href);
@@ -79,7 +74,7 @@ async function setTheme(id: ThemeId, animate: boolean) {
 
   const mod = await THEMES[id].load();
   if (gen !== generation) return;
-  unmount = mod.mount({ stage: hero.querySelector<HTMLElement>('.stage')!, hud });
+  unmount = mod.mount({ stage: hero.querySelector<HTMLElement>('.stage')! });
 }
 
 function wireTopbar() {

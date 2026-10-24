@@ -51,8 +51,3 @@ export function onSectionChange(cb: (section: SectionChange) => void): () => voi
   document.addEventListener('section:change', handler);
   return () => document.removeEventListener('section:change', handler);
 }
-
-export function scrollProgress(): number {
-  const max = document.documentElement.scrollHeight - innerHeight;
-  return max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
-}

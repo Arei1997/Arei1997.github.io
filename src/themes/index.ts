@@ -1,5 +1,3 @@
-import { pad } from '../lib/dom';
-
 export type ThemeId = 'garage' | 'arcade' | 'studio';
 
 export const THEME_IDS: readonly ThemeId[] = ['garage', 'arcade', 'studio'];
@@ -18,8 +16,6 @@ export const SECTION_TITLES: Record<SectionId, string> = {
 export interface MountContext {
   /** The hero panel that holds the theme's interactive centrepiece. */
   stage: HTMLElement;
-  /** Fixed overlay layer for HUD widgets. */
-  hud: HTMLElement;
 }
 
 export interface ThemeModule {
@@ -32,14 +28,8 @@ export interface ThemeDef {
   name: string;
   interest: string;
   icon: string;
-  heroKicker: string;
-  ctaPrimary: string;
   stageLabel: string;
   stageHint: string;
-  contactTitle: string;
-  kicker(index: number, section: SectionId): string;
-  jobLabel(index: number, total: number): string;
-  projectLabel(index: number): string;
   load(): Promise<ThemeModule>;
 }
 
@@ -58,43 +48,14 @@ const ICONS: Record<ThemeId, string> = {
   ),
 };
 
-const GARAGE: Record<SectionId, string> = {
-  about: 'Driver profile',
-  experience: 'Race history',
-  projects: 'The builds',
-  skills: 'Spec sheet',
-  contact: 'Pit lane',
-};
-const ARCADE: Record<SectionId, string> = {
-  about: 'Player profile',
-  experience: 'Quest log',
-  projects: 'Levels cleared',
-  skills: 'Skill tree',
-  contact: 'Multiplayer',
-};
-const STUDIO: Record<SectionId, string> = {
-  about: 'Liner notes',
-  experience: 'On tour',
-  projects: 'Discography',
-  skills: 'Instruments',
-  contact: 'Encore',
-};
-
 export const THEMES: Record<ThemeId, ThemeDef> = {
   garage: {
     id: 'garage',
     name: 'Garage',
     interest: 'Cars',
     icon: ICONS.garage,
-    heroKicker: 'Engineered for performance',
-    ctaPrimary: 'See the builds',
     stageLabel: 'Interactive wind tunnel',
-    stageHint:
-      'Move your cursor through the tunnel to release smoke, and try changing the body, air speed and Reynolds number. Hold the rev counter to start a Mustang 5.0 V8.',
-    contactTitle: "Let's build something fast.",
-    kicker: (i, s) => `${pad(i + 1)} — ${GARAGE[s]}`,
-    jobLabel: (i, total) => `Stint ${pad(total - i)}`,
-    projectLabel: (i) => `Build ${pad(i + 1)}`,
+    stageHint: 'Move the cursor through the tunnel to trail smoke. Hold the rev counter to start the V8.',
     load: () => import('./garage'),
   },
   arcade: {
@@ -102,15 +63,8 @@ export const THEMES: Record<ThemeId, ThemeDef> = {
     name: 'Arcade',
     interest: 'Gaming',
     icon: ICONS.arcade,
-    heroKicker: 'Player one — ready',
-    ctaPrimary: 'Select a level',
     stageLabel: 'Playable mini-game',
-    stageHint:
-      'Click the game, then press Space or tap to jump. Hold it down to jump higher. You start on the early Earth and run through the dinosaurs into the future.',
-    contactTitle: 'Ready for co-op?',
-    kicker: (i, s) => `World 1-${i + 1} · ${ARCADE[s]}`,
-    jobLabel: (i, total) => `Quest ${pad(total - i)}`,
-    projectLabel: (i) => `Cartridge ${pad(i + 1)}`,
+    stageHint: 'Click the game, then press Space or tap to jump. Hold it to jump higher.',
     load: () => import('./arcade'),
   },
   studio: {
@@ -118,15 +72,8 @@ export const THEMES: Record<ThemeId, ThemeDef> = {
     name: 'Studio',
     interest: 'Music',
     icon: ICONS.studio,
-    heroKicker: 'Now playing',
-    ctaPrimary: 'Browse the discography',
     stageLabel: 'Mini music studio',
-    stageHint:
-      'Press play (or Space), click squares in the channel rack to make a beat, and add a melody in the piano roll. You can also load a pattern, or hit record and play along on the Keys or Guitar tab.',
-    contactTitle: "Let's make something together.",
-    kicker: (i, s) => `Track ${pad(i + 1)} · ${STUDIO[s]}`,
-    jobLabel: (i) => `Side ${String.fromCharCode(65 + i)}`,
-    projectLabel: (i) => `LP ${pad(i + 1)}`,
+    stageHint: 'Press play, then click squares to write a beat. The Keys and Guitar tabs are playable too.',
     load: () => import('./studio'),
   },
 };

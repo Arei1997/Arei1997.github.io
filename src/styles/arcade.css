@@ -46,40 +46,11 @@
   text-shadow: 4px 4px 0 var(--accent-2);
 }
 
-[data-theme='arcade'] .hero-name::after {
-  content: '_';
-  color: var(--accent);
-  text-shadow: none;
-  animation: blink 1s steps(1) infinite;
-}
-
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
-}
-
 [data-theme='arcade'] .section-title {
-  font-size: clamp(1.25rem, 2.8vw, 1.9rem);
-  line-height: 1.45;
+  /* Press Start 2P is very wide; this keeps "Experience" inside the 200px heading column. */
+  font-size: 1rem;
+  line-height: 1.6;
   text-shadow: 3px 3px 0 var(--accent-2);
-}
-
-[data-theme='arcade'] .contact-title {
-  font-size: clamp(1.4rem, 3.6vw, 2.4rem);
-  line-height: 1.45;
-  color: var(--ok);
-}
-
-[data-theme='arcade'] .interest-name,
-[data-theme='arcade'] .edu b {
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-[data-theme='arcade'] .kicker,
-[data-theme='arcade'] .hero-kicker {
-  color: var(--ok);
 }
 
 [data-theme='arcade'] .brand-mark {
@@ -110,73 +81,9 @@
   color: var(--accent);
 }
 
-[data-theme='arcade'] .facts,
-[data-theme='arcade'] .edu li,
-[data-theme='arcade'] .job,
-[data-theme='arcade'] .project,
-[data-theme='arcade'] .skill-group,
-[data-theme='arcade'] .interest,
 [data-theme='arcade'] .stage {
   border: 2px solid var(--line-strong);
   box-shadow: 6px 6px 0 rgba(255, 43, 214, 0.3);
-}
-
-[data-theme='arcade'] .project:hover,
-[data-theme='arcade'] .interest:hover {
-  transform: translate(-3px, -3px);
-  border-color: var(--accent);
-  box-shadow: 9px 9px 0 var(--accent-2);
-}
-
-[data-theme='arcade'] .job-label::before {
-  content: '▶ ';
-  color: var(--accent-2);
-}
-
-[data-theme='arcade'] .project-art {
-  background-color: hsl(var(--h) 70% 22%);
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.28) 2px, transparent 2px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.28) 2px, transparent 2px);
-  background-size: 14px 14px;
-  border-bottom: 2px solid var(--line-strong);
-}
-
-/* Cartridge label strip. */
-[data-theme='arcade'] .project-art::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  right: 14px;
-  width: 56px;
-  height: 10px;
-  background: repeating-linear-gradient(90deg, var(--ok) 0 6px, transparent 6px 10px);
-  opacity: 0.8;
-}
-
-[data-theme='arcade'] .art-label {
-  font-family: var(--font-display);
-  font-size: 0.55rem;
-  color: var(--text);
-}
-
-[data-theme='arcade'] .art-num {
-  font-size: 2.4rem;
-  bottom: 18px;
-  color: var(--text);
-  text-shadow: 4px 4px 0 var(--accent-2);
-}
-
-[data-theme='arcade'] .chip,
-[data-theme='arcade'] .tag {
-  border: 2px solid var(--line-strong);
-  background: transparent;
-  border-radius: 0;
-}
-
-[data-theme='arcade'] .chip:hover {
-  border-color: var(--ok);
-  color: var(--ok);
 }
 
 [data-theme='arcade'] .switcher button[aria-pressed='true'] {
@@ -247,179 +154,8 @@ html.konami main {
   box-shadow: 0 0 6px rgba(57, 255, 20, 0.6);
 }
 
-/* HUD: XP bar, achievements, toasts */
-
-.xp {
-  position: fixed;
-  top: var(--topbar-h);
-  left: 0;
-  right: 0;
-  z-index: 45;
-  height: 5px;
-  background: rgba(0, 0, 0, 0.45);
-}
-
-.xp-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--ok), var(--accent));
-  transform: scaleX(0);
-  transform-origin: left;
-  mask: repeating-linear-gradient(90deg, #000 0 14px, transparent 14px 16px);
-}
-
-.ach-dock {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 40;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.ach-toggle {
-  display: flex;
-  gap: 14px;
-  padding: 12px 16px;
-  border: 2px solid var(--text);
-  background: var(--bg);
-  font: 0.6rem/1 var(--font-display);
-  box-shadow: 4px 4px 0 var(--accent-2);
-  cursor: pointer;
-}
-
-.ach-level {
-  color: var(--ok);
-}
-
-.ach-count {
-  color: var(--accent-2);
-}
-
-.ach-panel {
-  width: min(320px, calc(100vw - 40px));
-  max-height: 60vh;
-  overflow: auto;
-  padding: 16px;
-  border: 2px solid var(--line-strong);
-  background: var(--surface);
-  box-shadow: 6px 6px 0 rgba(255, 43, 214, 0.35);
-}
-
-.ach-heading {
-  margin: 0 0 12px;
-  font: 0.65rem var(--font-display);
-  color: var(--accent);
-}
-
-.ach-list {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ach-list li {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  opacity: 0.45;
-}
-
-.ach-list li.got {
-  opacity: 1;
-}
-
-.ach-icon {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 30px;
-  height: 30px;
-  border: 2px solid var(--line-strong);
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  color: var(--muted);
-}
-
-.got .ach-icon {
-  border-color: var(--ok);
-  color: var(--ok);
-}
-
-.ach-list b {
-  display: block;
-  font-size: 0.85rem;
-}
-
-.ach-list small {
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-
-.toasts {
-  position: fixed;
-  left: 50%;
-  bottom: 24px;
-  z-index: 60;
-  display: grid;
-  gap: 10px;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.toast {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 260px;
-  padding: 14px 18px;
-  border: 2px solid var(--ok);
-  background: var(--bg);
-  box-shadow: 5px 5px 0 var(--accent-2);
-  animation: toast-in 0.35s steps(5);
-}
-
-.toast.out {
-  animation: toast-out 0.4s steps(4) forwards;
-}
-
-.toast-kicker {
-  font: 0.5rem var(--font-display);
-  color: var(--ok);
-  text-transform: uppercase;
-}
-
-.toast b {
-  font: 0.72rem/1.4 var(--font-display);
-  font-weight: 400;
-}
-
-@keyframes toast-in {
-  from {
-    transform: translateY(24px);
-    opacity: 0;
-  }
-}
-
-@keyframes toast-out {
-  to {
-    transform: translateY(24px);
-    opacity: 0;
-  }
-}
-
 @media (max-width: 640px) {
-  .ach-dock {
-    right: 12px;
-    bottom: 12px;
-  }
   .era-track i {
     width: 8px;
-  }
-  .toasts {
-    bottom: 80px;
   }
 }

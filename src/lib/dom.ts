@@ -8,8 +8,6 @@ const ENTITIES: Record<string, string> = {
 
 export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ENTITIES[c]);
 
-export const pad = (n: number) => String(n).padStart(2, '0');
-
 export const prefersReducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**

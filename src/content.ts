@@ -83,7 +83,7 @@ export const experience: Experience[] = [
     period: 'Feb 2026 – Present',
     location: 'London, UK',
     summary:
-      'I build and maintain the automation robots that handle high-volume work in Self Assessment, Fraud and Pensions. Using SQL and real time automation to improve the HMRC data collections',
+      'I build and maintain the automation robots that handle high-volume work in Self Assessment, Fraud and Pensions. Using SQL and real time automation to improve the HMRC data collections.',
     highlights: [
       "Cut the failure rate of HMRC's most important automation machine from 16% to 4%.",
       'Look after more than 75 production robots: spotting failures, fixing them and keeping them running.',
@@ -101,8 +101,8 @@ export const experience: Experience[] = [
       "I'm in the HMRC NCTS team, building the Scala APIs that validate, convert and route goods moving under the Common Transit Convention.",
     highlights: [
       'Led parts of the Scala 3 migration across several HMRC microservices without breaking existing clients.',
-      'Migratating versions for the whole API infrastrcutre resulting in refactoring of a whole code base led by me',
-      "Wrote a Python tool that turns the specifications into pages on HMRC's live developer portal. Parsing thousands of condiional statements for external developrs to read.",
+      'Led the version migration across the whole API infrastructure, which meant refactoring the entire codebase.',
+      "Wrote a Python tool that turns the specifications into pages on HMRC's live developer portal. It parses thousands of conditional statements so external developers can read them.",
       'Worked on the Pension Scheme Return and CDS Reimbursement Claim front ends: accessibility fixes, Welsh translations and new user journeys.',
     ],
     tech: ['Scala', 'Play Framework', 'Python', 'Java', 'Microservices', 'TDD'],

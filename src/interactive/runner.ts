@@ -279,13 +279,7 @@ function buildSprite(rows: string[]): HTMLCanvasElement {
   return c;
 }
 
-export interface RunnerHooks {
-  onStart(): void;
-  onScore(score: number): void;
-  onEra(index: number): void;
-}
-
-export function mountRunner(stage: HTMLElement, hooks: RunnerHooks): () => void {
+export function mountRunner(stage: HTMLElement): () => void {
   stage.innerHTML = `
     <div class="runner">
       <canvas width="${W}" height="${H}" tabindex="0" aria-label="Time Runner mini-game. Press Space or tap to jump; run from the molten early Earth to the far future."></canvas>
@@ -329,7 +323,6 @@ export function mountRunner(stage: HTMLElement, hooks: RunnerHooks): () => void 
   let things: Thing[] = [];
   let motes: Mote[] = [];
   let best = store.get<number>('arcade:best', 0);
-  let reported = false;
   bestEl.textContent = String(best);
 
   const score = () => Math.floor(dist / 8) + pickups * 50;
@@ -386,7 +379,6 @@ export function mountRunner(stage: HTMLElement, hooks: RunnerHooks): () => void 
     }
     resetWeather();
     showEra();
-    hooks.onEra(index);
   }
 
   function reset() {
@@ -419,7 +411,6 @@ export function mountRunner(stage: HTMLElement, hooks: RunnerHooks): () => void 
     if (state === 'ready') {
       reset();
       state = 'running';
-      hooks.onStart();
     } else if (state === 'over') {
       if (performance.now() - overAt < 450) return;
       reset();
@@ -534,12 +525,7 @@ export function mountRunner(stage: HTMLElement, hooks: RunnerHooks): () => void 
     }
     things = things.filter((th) => !th.taken && th.x + 20 > 0);
 
-    const s = score();
-    scoreEl.textContent = String(s);
-    if (s >= 500 && !reported) {
-      reported = true;
-      hooks.onScore(s);
-    }
+    scoreEl.textContent = String(score());
   }
 
   // ---------- Drawing ----------

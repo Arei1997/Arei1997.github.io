@@ -1,13 +1,7 @@
 import { mountDaw } from '../interactive/daw';
 import { audioIfReady } from '../lib/audio';
-import { pad, visibleLoop } from '../lib/dom';
-import { currentSection, onSectionChange, scrollProgress, type SectionChange } from '../lib/sections';
-import { SECTIONS, SECTION_TITLES, type MountContext } from './index';
-
-// Four minutes thirty-three seconds — the length of the "track" you scroll through.
-const TRACK_SECONDS = 273;
-
-const clock = (s: number) => `${Math.floor(s / 60)}:${pad(Math.floor(s % 60))}`;
+import { visibleLoop } from '../lib/dom';
+import type { MountContext } from './index';
 
 /** Master-bus spectrum meter in the transport bar. */
 function mountVisualizer(canvas: HTMLCanvasElement): () => void {
@@ -41,86 +35,18 @@ function mountVisualizer(canvas: HTMLCanvasElement): () => void {
   });
 }
 
-function mountHud(hud: HTMLElement): () => void {
-  const bar = document.createElement('div');
-  bar.className = 'playhead';
-  bar.innerHTML = '<div class="playhead-fill"></div>';
-  const np = document.createElement('div');
-  np.className = 'now-playing';
-  np.innerHTML = `
-    <span class="vinyl" aria-hidden="true"></span>
-    <span class="np-text"><span class="np-label">Now playing</span><b class="np-title"></b></span>
-    <span class="np-time"></span>`;
-  hud.append(bar, np);
-
-  const fill = bar.querySelector<HTMLElement>('.playhead-fill')!;
-  const title = np.querySelector<HTMLElement>('.np-title')!;
-  const time = np.querySelector<HTMLElement>('.np-time')!;
-
-  const placeTicks = () => {
-    bar.querySelectorAll('.playhead-tick').forEach((t) => t.remove());
-    const total = document.documentElement.scrollHeight - innerHeight;
-    if (total <= 0) return;
-    for (const id of SECTIONS) {
-      const el = document.getElementById(id);
-      if (!el) continue;
-      const tick = document.createElement('span');
-      tick.className = 'playhead-tick';
-      tick.style.left = `${Math.min(100, ((el.offsetTop - innerHeight * 0.45) / total) * 100)}%`;
-      bar.append(tick);
-    }
-  };
-
-  let raf = 0;
-  let spinTimer = 0;
-  const update = () => {
-    raf = 0;
-    const p = scrollProgress();
-    fill.style.transform = `scaleX(${p})`;
-    time.textContent = `${clock(p * TRACK_SECONDS)} / ${clock(TRACK_SECONDS)}`;
-  };
-  const onScroll = () => {
-    if (!raf) raf = requestAnimationFrame(update);
-    np.classList.add('scrubbing');
-    clearTimeout(spinTimer);
-    spinTimer = window.setTimeout(() => np.classList.remove('scrubbing'), 350);
-  };
-  const showTrack = (s: SectionChange) => {
-    title.textContent = s.index < 0 ? 'Intro' : `${pad(s.index + 1)} · ${SECTION_TITLES[SECTIONS[s.index]]}`;
-  };
-
-  const ro = new ResizeObserver(placeTicks);
-  ro.observe(document.body);
-  addEventListener('scroll', onScroll, { passive: true });
-  const offSection = onSectionChange(showTrack);
-  showTrack(currentSection());
-  update();
-
-  return () => {
-    ro.disconnect();
-    removeEventListener('scroll', onScroll);
-    offSection();
-    cancelAnimationFrame(raf);
-    clearTimeout(spinTimer);
-    bar.remove();
-    np.remove();
-  };
-}
-
-export function mount({ stage, hud }: MountContext) {
+export function mount({ stage }: MountContext) {
   let inView = false;
   const io = new IntersectionObserver(([e]) => (inView = e.isIntersecting));
   io.observe(stage);
 
   const stopDaw = mountDaw(stage, { inView: () => inView });
   const stopViz = mountVisualizer(stage.querySelector<HTMLCanvasElement>('.viz')!);
-  const stopHud = mountHud(hud);
 
   return () => {
     io.disconnect();
     stopDaw();
     stopViz();
-    stopHud();
     stage.replaceChildren();
   };
 }

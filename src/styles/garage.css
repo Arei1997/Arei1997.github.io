@@ -26,28 +26,13 @@
 }
 
 [data-theme='garage'] .hero-name,
-[data-theme='garage'] .section-title,
-[data-theme='garage'] .contact-title,
-[data-theme='garage'] .interest-name,
-[data-theme='garage'] .edu b,
-[data-theme='garage'] .art-num {
+[data-theme='garage'] .section-title {
   font-style: italic;
   text-transform: uppercase;
 }
 
 [data-theme='garage'] .hero-name {
   font-size: clamp(3.2rem, 7.4vw, 5.8rem);
-}
-
-[data-theme='garage'] .kicker::before,
-[data-theme='garage'] .hero-kicker::before {
-  content: '';
-  display: inline-block;
-  width: 26px;
-  height: 3px;
-  margin: 0 10px 3px 0;
-  background: var(--accent);
-  transform: skewX(-30deg);
 }
 
 [data-theme='garage'] .btn {
@@ -62,62 +47,6 @@
   padding-inline: 28px;
 }
 
-/* Cards get a chamfered corner, like a machined plate. */
-[data-theme='garage'] .job,
-[data-theme='garage'] .project,
-[data-theme='garage'] .skill-group {
-  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
-}
-
-[data-theme='garage'] .job {
-  border-left: 3px solid var(--accent);
-}
-
-[data-theme='garage'] .project:hover {
-  transform: translateY(-4px);
-  border-color: var(--accent);
-}
-
-[data-theme='garage'] .project-art {
-  background:
-    linear-gradient(115deg, transparent 52%, rgba(255, 59, 48, 0.85) 52% 56%, transparent 56% 59%, rgba(255, 204, 0, 0.8) 59% 61%, transparent 61%),
-    linear-gradient(135deg, hsl(var(--h) 40% 17%), #0b0c0f 75%);
-}
-
-[data-theme='garage'] .project-art::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 0;
-  height: 6px;
-  background: repeating-linear-gradient(-45deg, var(--accent-2) 0 10px, #111 10px 20px);
-}
-
-[data-theme='garage'] .art-label {
-  color: var(--accent-2);
-}
-
-[data-theme='garage'] .art-num {
-  color: rgba(255, 255, 255, 0.92);
-  bottom: 14px;
-}
-
-[data-theme='garage'] .chip {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  border-left: 2px solid var(--accent);
-}
-
-[data-theme='garage'] .contact::before {
-  content: '';
-  display: block;
-  width: 180px;
-  height: 24px;
-  margin: -40px auto 48px;
-  background: repeating-conic-gradient(#eceef2 0 25%, #0b0c0f 0 50%) 0 0 / 24px 24px;
-  border: 1px solid var(--line-strong);
-  transform: skewX(-12deg);
-}
-
 /* Wind tunnel */
 
 .tunnel-view {
@@ -130,35 +59,6 @@
   background: #0a0b0e;
   cursor: crosshair;
   touch-action: pan-y;
-}
-
-.tunnel-tag {
-  position: absolute;
-  top: 12px;
-  left: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font: 600 0.66rem var(--font-mono);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-  pointer-events: none;
-}
-
-.tunnel-tag i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 10px var(--accent);
-  animation: pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  50% {
-    opacity: 0.3;
-  }
 }
 
 .tunnel-readout {
